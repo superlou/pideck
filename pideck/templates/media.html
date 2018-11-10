@@ -1,0 +1,26 @@
+<!doctype html>
+<title>pideck</title>
+<h1>Media</h1>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{message}}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+{% endwith %}
+
+<a href="{{url_for('upload_file')}}">Upload File</a>
+
+<form method="POST" action="player">
+  <ul>
+    {% for file in files %}
+      <li>
+        {{file}}
+        <button type="submit" name="play" value="{{file}}">play</button>
+      </li>
+    {% endfor %}
+  </ul>
+</form>

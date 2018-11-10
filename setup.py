@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import setuptools
 
 with open('README.md', 'r') as fh:
@@ -12,8 +13,19 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
+    install_requires=[
+        'flask',
+        'omxplayer-wrapper',
+        'werkzeug',
+        'mock',
+    ],
     classifiers=[
         "Programming Language :: Python :: 3",
         "Operating System :: Raspbian",
-    ]
+    ],
+    entry_points={
+        'console_scripts': [
+            'pideck=pideck.server:main'
+        ]
+    }
 )

@@ -1,3 +1,5 @@
 .pyc
 .ropeproject
 *.egg-info
+__pycache__
+media/*
