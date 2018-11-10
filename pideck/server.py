@@ -2,9 +2,9 @@
 import os
 from os.path import join, isfile
 from flask import Flask, flash, request, redirect, url_for
-from flask import render_template
+from flask import render_template, jsonify
 from werkzeug.utils import secure_filename
-from omxplayer.player import OMXPlayer
+from .omx import Omx
 
 
 app = Flask(__name__)
@@ -44,13 +44,30 @@ def player():
         if 'play' in request.form:
             filename = request.form['play']
             filepath = join(app.config['MEDIA_FOLDER'], filename)
-            player = OMXPlayer(filepath)
+            app.config['omx'].play(filepath)
+        elif 'stop' in request.form:
+            app.config['omx'].stop()
+        elif 'pause' in request.form:
+            app.config['omx'].pause()
 
     return redirect('/media')
 
 
+@app.route('/player.json')
+def player_status():
+    omx = app.config['omx']
+    return jsonify(omx.status())
+
+
+def create_folder(folder):
+    if not os.path.exists(folder):
+        os.makedirs(folder)
+
+
 def main():
     app.config['MEDIA_FOLDER'] = 'media'
+    create_folder(app.config['MEDIA_FOLDER'])
+    app.config['omx'] = Omx()
     app.config['DEBUG'] = True
     app.run(host='0.0.0.0', port=8910)
 
