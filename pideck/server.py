@@ -67,6 +67,10 @@ def player_status():
                 app.config['omx'].pause()
             if key == 'action' and val == 'stop':
                 app.config['omx'].stop()
+            if key == 'action' and val == 'play':
+                source = request.form['source']
+                filepath = join(app.config['MEDIA_FOLDER'], source)
+                app.config['omx'].play(filepath)
         
         return jsonify({'msg': 'ok'})
 
