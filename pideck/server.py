@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import base64
 from os.path import join, isfile
 from flask import Flask, flash, request, redirect, url_for
 from flask import render_template, jsonify
@@ -75,23 +76,51 @@ def player_status():
         return jsonify({'msg': 'ok'})
 
 
-@app.route('/api/media-files')
+@app.route('/api/media-files', methods=['GET', 'POST'])
 def media_files():
     media_folder = app.config['MEDIA_FOLDER']
     
-    data = [{
-        'type': 'media-file',
-        'id': i,
-        'attributes': {
-            'source': f,
+    if request.method == 'GET':      
+        data = [{
+            'type': 'media-file',
+            'id': base64.b64encode(f.encode()),
+            'attributes': {
+                'source': f,
+            }
+        } for i, f in enumerate(os.listdir(media_folder)) if isfile(join(media_folder, f))]
+        
+        response = {
+            'data': data
         }
-    } for i, f in enumerate(os.listdir(media_folder)) if isfile(join(media_folder, f))]
+        
+        return jsonify(response)
     
-    response = {
-        'data': data
-    }
+    if request.method == 'POST':      
+        if 'action' not in request.form:
+            return jsonify({'err': 'no action specified'})
+                    
+        return jsonify({'msg': 'ok'})
+
+
+@app.route('/api/media-files/<id>', methods=['DELETE', 'OPTIONS'])
+def media_file(id):
+    media_folder = app.config['MEDIA_FOLDER']
     
-    return jsonify(response)    
+    if request.method == 'OPTIONS':
+        return ('', 204)
+    
+    if request.method == 'DELETE':
+        filename = base64.b64decode(id).decode()
+        filepath = join(media_folder, filename)
+        print(filepath)
+        
+        if not isfile(filepath):
+            return jsonify({'err': 'file not found'})
+        
+        os.remove(filepath)
+        return ('', 204)
+        
+    return jsonify({'msg': 'ok'})
 
 
 @app.route('/api/media-files/upload', methods=['POST'])
