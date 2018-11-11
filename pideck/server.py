@@ -94,6 +94,21 @@ def media_files():
     return jsonify(response)    
 
 
+@app.route('/api/media-files/upload', methods=['POST'])
+def media_file_upload():
+    if 'file' not in request.files:
+        return jsonify({'err': 'no file part'});
+
+    file = request.files['file']
+
+    if file.filename == '':
+        return jsonify({'err': 'no selected file'});
+
+    filename = secure_filename(file.filename)
+    file.save(join(app.config['MEDIA_FOLDER'], filename))
+    return jsonify({'msg': 'ok'});
+
+
 def create_folder(folder):
     if not os.path.exists(folder):
         os.makedirs(folder)
