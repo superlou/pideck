@@ -17,7 +17,7 @@ setuptools.setup(
         'flask',
         'omxplayer-wrapper',
         'werkzeug',
-        'mock',
+        'flask-cors',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

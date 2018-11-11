@@ -3,12 +3,14 @@ import os
 from os.path import join, isfile
 from flask import Flask, flash, request, redirect, url_for
 from flask import render_template, jsonify
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 from .omx import Omx
 
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
+CORS(app)
 
 
 @app.route('/media/upload', methods=['GET', 'POST'])
@@ -53,10 +55,39 @@ def player():
     return redirect('/media')
 
 
-@app.route('/player.json')
+@app.route('/api/player', methods=['GET', 'POST'])
 def player_status():
-    omx = app.config['omx']
-    return jsonify(omx.status())
+    if request.method == 'GET':
+        omx = app.config['omx']
+        return jsonify(omx.status())
+    
+    if request.method == 'POST':
+        for key, val in request.form.items():
+            if key == 'action' and val == 'toggle_pause':
+                app.config['omx'].pause()
+            if key == 'action' and val == 'stop':
+                app.config['omx'].stop()
+        
+        return jsonify({'msg': 'ok'})
+
+
+@app.route('/api/media-files')
+def media_files():
+    media_folder = app.config['MEDIA_FOLDER']
+    
+    data = [{
+        'type': 'media-file',
+        'id': i,
+        'attributes': {
+            'source': f,
+        }
+    } for i, f in enumerate(os.listdir(media_folder)) if isfile(join(media_folder, f))]
+    
+    response = {
+        'data': data
+    }
+    
+    return jsonify(response)    
 
 
 def create_folder(folder):
