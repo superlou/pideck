@@ -2,8 +2,9 @@ from omxplayer.player import OMXPlayer
 
 
 class Omx:
-    def __init__(self):
+    def __init__(self, media_folder):
         self.player = None
+        self.media_folder = media_folder
         
     def play(self, filename):
         if self.player:
@@ -24,6 +25,14 @@ class Omx:
         
         self.player.play_pause()
         
+    def get_source(self):
+        """ Get player source and remove media folder """
+        source = self.player.get_source()
+        if source.startswith(self.media_folder + "/"):
+            return source[len(self.media_folder) + 1:]
+        else:
+            return source
+        
     def status(self):
         if not self.player:
             return {
@@ -33,7 +42,7 @@ class Omx:
     
         return {
             'status': self.player.playback_status(),
-            'source': self.player.get_source(),
+            'source': self.get_source(),
             'position': self.player.position(),
             'duration': self.player.duration(),
             'volume': self.player.volume(),

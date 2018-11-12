@@ -123,19 +123,23 @@ def media_file(id):
     return jsonify({'msg': 'ok'})
 
 
-@app.route('/api/media-files/upload', methods=['POST'])
+@app.route('/api/media-files/upload', methods=['POST', 'OPTIONS'])
 def media_file_upload():
-    if 'file' not in request.files:
-        return jsonify({'err': 'no file part'});
+    if request.method == 'OPTIONS':
+        return ('', 204)
+    
+    if request.method == 'POST':
+        if 'file' not in request.files:
+            return jsonify({'err': 'no file part'});
 
-    file = request.files['file']
+        file = request.files['file']
 
-    if file.filename == '':
-        return jsonify({'err': 'no selected file'});
+        if file.filename == '':
+            return jsonify({'err': 'no selected file'});
 
-    filename = secure_filename(file.filename)
-    file.save(join(app.config['MEDIA_FOLDER'], filename))
-    return jsonify({'msg': 'ok'});
+        filename = secure_filename(file.filename)
+        file.save(join(app.config['MEDIA_FOLDER'], filename))
+        return jsonify({'msg': 'ok'});
 
 
 def create_folder(folder):
@@ -146,7 +150,7 @@ def create_folder(folder):
 def main():
     app.config['MEDIA_FOLDER'] = 'media'
     create_folder(app.config['MEDIA_FOLDER'])
-    app.config['omx'] = Omx()
+    app.config['omx'] = Omx(app.config['MEDIA_FOLDER'])
     app.config['DEBUG'] = True
     app.run(host='0.0.0.0', port=8910)
 
