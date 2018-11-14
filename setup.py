@@ -18,6 +18,9 @@ setuptools.setup(
         'omxplayer-wrapper',
         'werkzeug',
         'flask-cors',
+        'flask-socketio',
+        'gevent',		# eventlet didn't work with ember-websockets
+        'gevent-websocket',
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

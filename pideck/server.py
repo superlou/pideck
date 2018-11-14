@@ -5,13 +5,17 @@ from os.path import join, isfile
 from flask import Flask, flash, request, redirect, url_for
 from flask import render_template, jsonify
 from flask_cors import CORS
+from flask_socketio import SocketIO, send
 from werkzeug.utils import secure_filename
+import time
+import threading
 from .omx import Omx
 
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 CORS(app)
+socketio = SocketIO(app)
 
 
 @app.route('/media/upload', methods=['GET', 'POST'])
@@ -142,6 +146,19 @@ def media_file_upload():
         return jsonify({'msg': 'ok'});
 
 
+@app.before_first_request
+def start_send_player_status():
+    t = threading.Thread(target=send_player_status, args=(app.config['omx'], ))
+    t.daemon = True
+    t.start()
+
+
+def send_player_status(omx):
+    while (1):
+        socketio.send({'player_status': omx.status()})
+        time.sleep(0.02)
+
+
 def create_folder(folder):
     if not os.path.exists(folder):
         os.makedirs(folder)
@@ -152,7 +169,8 @@ def main():
     create_folder(app.config['MEDIA_FOLDER'])
     app.config['omx'] = Omx(app.config['MEDIA_FOLDER'])
     app.config['DEBUG'] = True
-    app.run(host='0.0.0.0', port=8910)
+    
+    socketio.run(app, host='0.0.0.0', port=8910, debug=True)
 
 
 if __name__ == '__main__':
