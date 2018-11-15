@@ -12,7 +12,7 @@ class Omx:
             self.expects_loading_exit = True
             self.player.load(filename)
         else:
-            self.player = OMXPlayer(filename, args=['-b', '--no-osd'])
+            self.player = OMXPlayer(filename, args=['-b', '--no-osd', '-o', 'both'])
             self.player.stopEvent += self.on_player_stop
             self.player.exitEvent += self.on_player_exit
 
