@@ -25,6 +25,13 @@ class Omx:
         
         self.player.play_pause()
         
+    def seek_fraction(self, fraction):
+        if not self.player:
+            return
+        
+        duration = self.player.duration()
+        self.player.set_position(fraction * duration)
+        
     def get_source(self):
         """ Get player source and remove media folder """
         source = self.player.get_source()

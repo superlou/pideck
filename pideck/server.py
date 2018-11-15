@@ -76,6 +76,8 @@ def player_status():
                 source = request.form['source']
                 filepath = join(app.config['MEDIA_FOLDER'], source)
                 app.config['omx'].play(filepath)
+            if key == 'action' and val == 'seek_fraction':
+                app.config['omx'].seek_fraction(float(request.form['fraction']))
         
         return jsonify({'msg': 'ok'})
 
