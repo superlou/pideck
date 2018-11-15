@@ -5,13 +5,26 @@ class Omx:
     def __init__(self, media_folder):
         self.player = None
         self.media_folder = media_folder
+        self.expects_loading_exit = False
         
     def play(self, filename):
         if self.player:
+            self.expects_loading_exit = True
             self.player.load(filename)
         else:
             self.player = OMXPlayer(filename, args=['-b', '--no-osd'])
-            
+            self.player.stopEvent += self.on_player_stop
+            self.player.exitEvent += self.on_player_exit
+
+    def on_player_stop(self, player):
+        self.player = None
+
+    def on_player_exit(self, player, exit_status):
+        if self.expects_loading_exit:
+            self.expects_loading_exit = False
+        else:
+            self.player = None
+
     def stop(self):
         if not self.player:
             return

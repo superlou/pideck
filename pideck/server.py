@@ -157,7 +157,11 @@ def start_send_player_status():
 
 def send_player_status(omx):
     while (1):
-        socketio.send({'player_status': omx.status()})
+        try:
+            socketio.send({'player_status': omx.status()})
+        except Exception:
+            pass
+        
         time.sleep(0.02)
 
 
