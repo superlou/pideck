@@ -10,6 +10,7 @@ from werkzeug.utils import secure_filename
 import time
 import threading
 from .omx import Omx
+from .status_image_builder import StatusImageBuilder
 
 
 app = Flask(__name__)
@@ -65,7 +66,7 @@ def player_status():
     if request.method == 'GET':
         omx = app.config['omx']
         return jsonify(omx.status())
-    
+
     if request.method == 'POST':
         for key, val in request.form.items():
             if key == 'action' and val == 'toggle_pause':
@@ -78,15 +79,15 @@ def player_status():
                 app.config['omx'].play(filepath)
             if key == 'action' and val == 'seek_fraction':
                 app.config['omx'].seek_fraction(float(request.form['fraction']))
-        
+
         return jsonify({'msg': 'ok'})
 
 
 @app.route('/api/media-files', methods=['GET', 'POST'])
 def media_files():
     media_folder = app.config['MEDIA_FOLDER']
-    
-    if request.method == 'GET':      
+
+    if request.method == 'GET':
         data = [{
             'type': 'media-file',
             'id': base64.b64encode(f.encode()),
@@ -94,38 +95,38 @@ def media_files():
                 'source': f,
             }
         } for i, f in enumerate(os.listdir(media_folder)) if isfile(join(media_folder, f))]
-        
+
         response = {
             'data': data
         }
-        
+
         return jsonify(response)
-    
-    if request.method == 'POST':      
+
+    if request.method == 'POST':
         if 'action' not in request.form:
             return jsonify({'err': 'no action specified'})
-                    
+
         return jsonify({'msg': 'ok'})
 
 
 @app.route('/api/media-files/<id>', methods=['DELETE', 'OPTIONS'])
 def media_file(id):
     media_folder = app.config['MEDIA_FOLDER']
-    
+
     if request.method == 'OPTIONS':
         return ('', 204)
-    
+
     if request.method == 'DELETE':
         filename = base64.b64decode(id).decode()
         filepath = join(media_folder, filename)
         print(filepath)
-        
+
         if not isfile(filepath):
             return jsonify({'err': 'file not found'})
-        
+
         os.remove(filepath)
         return ('', 204)
-        
+
     return jsonify({'msg': 'ok'})
 
 
@@ -133,7 +134,7 @@ def media_file(id):
 def media_file_upload():
     if request.method == 'OPTIONS':
         return ('', 204)
-    
+
     if request.method == 'POST':
         if 'file' not in request.files:
             return jsonify({'err': 'no file part'});
@@ -161,7 +162,7 @@ def send_player_status(omx):
             socketio.send({'player_status': omx.status()})
         except Exception:
             pass
-        
+
         time.sleep(0.02)
 
 
@@ -170,12 +171,18 @@ def create_folder(folder):
         os.makedirs(folder)
 
 
+import subprocess
+
 def main():
+    image_builder = StatusImageBuilder()
+    image_builder.generate('media/status.png')
+    subprocess.run(['pcmanfm', '--set-wallpaper', '/home/pi/workspace/pideck/media/status.png'])
+
     app.config['MEDIA_FOLDER'] = 'media'
     create_folder(app.config['MEDIA_FOLDER'])
     app.config['omx'] = Omx(app.config['MEDIA_FOLDER'])
     app.config['DEBUG'] = True
-    
+
     socketio.run(app, host='0.0.0.0', port=8910, debug=True)
 
 

@@ -21,6 +21,8 @@ setuptools.setup(
         'flask-socketio',
         'gevent',		# eventlet didn't work with ember-websockets
         'gevent-websocket',
+        'pillow',
+        'netifaces'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
