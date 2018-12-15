@@ -7,7 +7,7 @@ import subprocess
 
 class StatusImageBuilder:
     def __init__(self):
-        pass
+        self.font = ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf', 60)
 
     def generate(self, output):
         hostname = socket.gethostname()
@@ -16,7 +16,7 @@ class StatusImageBuilder:
         ssid = get_ssid()
 
         white = (255, 255, 255)
-        font = ImageFont.truetype('Pillow/Tests/fonts/FreeMono.ttf', 60)
+        font = self.font
 
         image = Image.new('RGBA', (1024, 768))
         draw = ImageDraw.Draw(image)

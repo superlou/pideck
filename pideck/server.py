@@ -10,7 +10,7 @@ from werkzeug.utils import secure_filename
 import time
 import threading
 from .omx import Omx
-from .status_image_builder import StatusImageBuilder
+from .desktop_network_status import show_continuous_status
 
 
 app = Flask(__name__)
@@ -171,12 +171,8 @@ def create_folder(folder):
         os.makedirs(folder)
 
 
-import subprocess
-
 def main():
-    image_builder = StatusImageBuilder()
-    image_builder.generate('media/status.png')
-    subprocess.run(['pcmanfm', '--set-wallpaper', '/home/pi/workspace/pideck/media/status.png'])
+    show_continuous_status(5)
 
     app.config['MEDIA_FOLDER'] = 'media'
     create_folder(app.config['MEDIA_FOLDER'])
