@@ -79,6 +79,8 @@ def player_status():
                 app.config['omx'].play(filepath)
             if key == 'action' and val == 'seek_fraction':
                 app.config['omx'].seek_fraction(float(request.form['fraction']))
+            if key == 'action' and val == 'set_volume':
+                app.config['omx'].set_volume(float(request.form['volume']))                
 
         return jsonify({'msg': 'ok'})
 

@@ -12,7 +12,7 @@ class Omx:
             self.expects_loading_exit = True
             self.player.load(filename)
         else:
-            self.player = OMXPlayer(filename, args=['-b', '--no-osd', '-o', 'both'])
+            self.player = OMXPlayer(filename, args=['-b', '--no-osd', '-o', 'both', '--loop'])
             self.player.stopEvent += self.on_player_stop
             self.player.exitEvent += self.on_player_exit
 
@@ -44,7 +44,18 @@ class Omx:
         
         duration = self.player.duration()
         self.player.set_position(fraction * duration)
+    
+    def set_volume(self, volume):
+        if not self.player:
+            return
         
+        if volume > 10:
+            volume = 10
+        elif volume < 0:
+            volume = 0
+        
+        self.player.set_volume(volume)
+    
     def get_source(self):
         """ Get player source and remove media folder """
         source = self.player.get_source()
@@ -59,6 +70,8 @@ class Omx:
                 'status': 'stopped',
                 'source': None,
             }
+        
+        print(self.player.volume())
     
         return {
             'status': self.player.playback_status(),
