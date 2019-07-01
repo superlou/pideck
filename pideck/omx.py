@@ -12,7 +12,7 @@ class Omx:
             self.expects_loading_exit = True
             self.player.load(filename)
         else:
-            self.player = OMXPlayer(filename, args=['-b', '--no-osd', '-o', 'both', '--loop'])
+            self.player = OMXPlayer(filename, args=['-b', '--no-osd', '-o', 'both']) #, '--loop'])
             self.player.stopEvent += self.on_player_stop
             self.player.exitEvent += self.on_player_exit
 
@@ -70,8 +70,6 @@ class Omx:
                 'status': 'stopped',
                 'source': None,
             }
-        
-        print(self.player.volume())
     
         return {
             'status': self.player.playback_status(),

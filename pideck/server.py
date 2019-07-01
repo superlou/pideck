@@ -11,6 +11,7 @@ import time
 import threading
 from .omx import Omx
 from .desktop_network_status import show_continuous_status
+from .display import set_display_mode
 
 
 app = Flask(__name__)
@@ -148,6 +149,16 @@ def media_file_upload():
 
         filename = secure_filename(file.filename)
         file.save(join(app.config['MEDIA_FOLDER'], filename))
+        return jsonify({'msg': 'ok'});
+
+
+@app.route('/api/display', methods=['POST'])
+def set_display_mode_handler():
+    if request.method == 'POST':
+        if 'mode' not in request.form:
+            return jsonify({'err': 'must pass mode "blank" or "desktop"'})
+        
+        set_display_mode(request.form['mode'])   
         return jsonify({'msg': 'ok'});
 
 
