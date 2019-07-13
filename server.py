@@ -7,11 +7,9 @@ from flask import render_template, jsonify
 from flask_cors import CORS
 from flask_socketio import SocketIO, send
 from werkzeug.utils import secure_filename
-import time
 import threading
-from .omx import Omx
-from .desktop_network_status import show_continuous_status
-from .display import set_display_mode
+from omx import Omx
+from display import set_display_mode
 
 
 app = Flask(__name__)
@@ -66,6 +64,7 @@ def player():
 def player_status():
     if request.method == 'GET':
         omx = app.config['omx']
+        omx.play('media/VIDDYOZE-Logo_pop.mp4')
         return jsonify(omx.status())
 
     if request.method == 'POST':
@@ -162,21 +161,25 @@ def set_display_mode_handler():
         return jsonify({'msg': 'ok'});
 
 
-@app.before_first_request
-def start_send_player_status():
-    t = threading.Thread(target=send_player_status, args=(app.config['omx'], ))
-    t.daemon = True
-    t.start()
+send_status_thread = None
+thread_lock = threading.Lock()
+
+
+@socketio.on('connect')
+def handle_connect():
+    global send_status_thread
+    with thread_lock:
+        if send_status_thread is None:
+            send_status_thread = socketio.start_background_task(send_player_status, app.config['omx'])
 
 
 def send_player_status(omx):
-    while (1):
+    while True:
+        socketio.sleep(0.02)
         try:
             socketio.send({'player_status': omx.status()})
-        except Exception:
-            pass
-
-        time.sleep(0.02)
+        except Exception as e:
+            print(e)
 
 
 def create_folder(folder):
@@ -185,15 +188,14 @@ def create_folder(folder):
 
 
 def main():
-    show_continuous_status(5)
-
     app.config['MEDIA_FOLDER'] = 'media'
     create_folder(app.config['MEDIA_FOLDER'])
     app.config['omx'] = Omx(app.config['MEDIA_FOLDER'])
     app.config['DEBUG'] = True
 
-    socketio.run(app, host='0.0.0.0', port=8910, debug=True)
+    socketio.run(app, host='0.0.0.0', port=8910) #, debug=True)
 
 
 if __name__ == '__main__':
     main()
+

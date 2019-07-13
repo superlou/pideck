@@ -1,0 +1,8 @@
+flask
+omxplayer-wrapper
+werkzeug
+flask-cors
+flask-socketio
+eventlet
+pillow
+netifaces

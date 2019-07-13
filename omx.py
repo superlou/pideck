@@ -1,4 +1,5 @@
 from omxplayer.player import OMXPlayer
+#import pdb
 
 
 class Omx:
@@ -12,7 +13,14 @@ class Omx:
             self.expects_loading_exit = True
             self.player.load(filename)
         else:
-            self.player = OMXPlayer(filename, args=['-b', '--no-osd', '-o', 'both']) #, '--loop'])
+            print('here1')
+            #pdb.set_trace()
+            try:
+                self.player = OMXPlayer(filename, args=['-b', '--no-osd', '-o', 'both']) #, '--loop'])
+            except SystemError as e:
+                print(e)
+            
+            print('here2')
             self.player.stopEvent += self.on_player_stop
             self.player.exitEvent += self.on_player_exit
 
