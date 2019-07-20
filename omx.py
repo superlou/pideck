@@ -1,5 +1,4 @@
 from omxplayer.player import OMXPlayer
-#import pdb
 
 
 class Omx:
@@ -7,20 +6,26 @@ class Omx:
         self.player = None
         self.media_folder = media_folder
         self.expects_loading_exit = False
+        self.looping = False
         
-    def play(self, filename):
+    def play(self, filename, loop=False):
         if self.player:
             self.expects_loading_exit = True
             self.player.load(filename)
         else:
-            print('here1')
-            #pdb.set_trace()
+            args = ['-b', '--no-osd', '-o', 'both']
+            
+            if loop:
+                args += ['--loop']
+                self.looping = True
+            else:
+                self.looping = False
+            
             try:
-                self.player = OMXPlayer(filename, args=['-b', '--no-osd', '-o', 'both']) #, '--loop'])
+                self.player = OMXPlayer(filename, args=args)
             except SystemError as e:
                 print(e)
             
-            print('here2')
             self.player.stopEvent += self.on_player_stop
             self.player.exitEvent += self.on_player_exit
 
@@ -85,4 +90,5 @@ class Omx:
             'position': self.player.position(),
             'duration': self.player.duration(),
             'volume': self.player.volume(),
+            'looping': self.looping,
         }

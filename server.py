@@ -76,11 +76,13 @@ def player_status():
             if key == 'action' and val == 'play':
                 source = request.form['source']
                 filepath = join(app.config['MEDIA_FOLDER'], source)
-                app.config['omx'].play(filepath)
+                app.config['omx'].play(filepath, loop=app.config['loop'])
             if key == 'action' and val == 'seek_fraction':
                 app.config['omx'].seek_fraction(float(request.form['fraction']))
             if key == 'action' and val == 'set_volume':
-                app.config['omx'].set_volume(float(request.form['volume']))                
+                app.config['omx'].set_volume(float(request.form['volume']))
+            if key == 'action' and val == 'set_looping':
+                app.config['loop'] = (request.form['state'] == 'true')
 
         return jsonify({'msg': 'ok'})
 
@@ -190,6 +192,7 @@ def create_folder(folder):
 def main():
     app.config['MEDIA_FOLDER'] = 'media'
     create_folder(app.config['MEDIA_FOLDER'])
+    app.config['loop'] = False
     app.config['omx'] = Omx(app.config['MEDIA_FOLDER'])
     app.config['DEBUG'] = True
 
